@@ -1,4 +1,9 @@
 <context>
+    <output>
+    <item>Hi!</item>
+    <item>Hello!</item>
+    <item>Good morning $UserName!</item>
+    </output>
     <output value="Привет Я сестра-близнец Алисы!"/>
     <input pattern="(hi|hello) *">
         <!-- Greet the user if we know his/her name -->
