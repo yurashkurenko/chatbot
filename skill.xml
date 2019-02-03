@@ -1,17 +1,59 @@
 <context>
-    <input pattern="(hi|hello) *">
-        <!-- Greet the user if we know his/her name -->
-        <output value="Hello $UserName!" if="full($UserName)"/>
 
-        <!-- Or activate an inner context to ask the user about his/her name -->
-        <context if="empty($UserName)" modal="true"> <!-- We use a modal context, so our bot will recognize any text as the user’s name -->
-            <output value="Hi! What is your name?"/>
+    <sample>
+        <item value="Кто такая Алиса"/>
+        <item value="Что такое бот"/>
+    </sample>
+
+    <input pattern="* (привет*|здравствуй*) *">
+        <output if="full($UserName)">
+            <item value="Привет, $UserName! Рада снова видеть тебя!"/>
+            <item value="Здравствуй, $UserName! Я уже успела соскучиться..."/>
+        </output>
+
+        <context if="empty($UserName)" id="name">
+            <output value="Привет! Меня зовут Алиса! А это - демонстрация моего навыка, созданного с помощью платформы zenbot. Как тебя зовут?"/>
 
             <input pattern="$Text">
-                <!-- Store the user’s name in the UserName variable with "user" scope to save it into database -->
-                <var name="UserName" value="$Text" scope="user"/>
-                <output value="Nice to meet you, $UserName!"/> <!-- Using the placeholder in output -->
+                <var name="UserName" value="cap($Text)" scope="user"/>
+                <output value="Приятно познакомиться, $UserName! Напиши мне что-нибудь."/>
+                <context/>
             </input>
         </context>
     </input>
+
+    <input pattern="* пока *">
+        <var name="end_session" value="javascript: true"/>
+        <output value="Ну пока, незнакомец!" if="empty($UserName)"/>
+        <output value="Пока-пока, $UserName!"/>
+    </input>
+
+    <input pattern="[* (кто|что) так*] $Text">
+        <context id="name" if="empty($UserName)"/>
+
+        <context id="wiki" if="full($UserName)">
+            <get url="http://ru.wikipedia.org/w/api.php" var="Wiki">
+                <param name="format" value="xml"/>
+                <param name="action" value="opensearch"/>
+                <param name="search" value="$Text"/>
+            </get>
+
+            <var name="Items" value="javascript: $Wiki['SearchSuggestion']['Section']['Item']" if="full($Wiki)" scope="context"/>
+            <var name="Result" value="javascript: $Items[Math.floor(Math.random() * $Items.length)]['Description']['content']" if="full($Items)"/>
+
+            <output if="empty($Result)">
+                <item value='Я поискала в википедии, но ничего не нашла по запросу "$Text"'/>
+                <item value="В википедии ничего не нашлось..."/>
+            </output>
+
+            <output value="$Result" if="full($Result)"/>
+
+            <input pattern="* (еще|другой вариант) *"/>
+
+            <sample value="Другой вариант"/>
+        </context>
+
+
+    </input>
+
 </context>
