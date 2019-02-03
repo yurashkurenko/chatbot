@@ -1,4 +1,6 @@
 <context>
 <input pattern="$Number">
+</input>
 <output value="$Number is too small..."/>
+</output>
 </context>
